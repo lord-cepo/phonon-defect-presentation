@@ -42,7 +42,7 @@ class WorkFlow(Slide):
             Tex(r"Calculate \texttt{ph.x} dynamical matrices for a $q$-grid in UC and at $\Gamma$ in SC"),
             Tex("Difference between the real-space transform of the dynamical matrices (**)"),
             Tex("Double Fourier transform"),
-            Tex(r"\begin{flushleft} Fermi Golden rule or non-perturbative from matrix elements and non perturbet kets (*) \end{flushleft} "),
+            Tex(r"\begin{flushleft} Fermi Golden rule or non-perturbative from matrix elements and non perturbed kets (*) \end{flushleft} "),
             Tex("Calculate the imaginary part of the energy"),
             Tex("directly from the linewidths"),
         ).scale(0.5)
@@ -131,14 +131,18 @@ class Centering(Slide):
             )
         label_valid[1].set(color=YELLOW)
 
+
+        T = 8
         fc_graph = Axes(
-            x_range=[-0.5, 4.5, 1],
+            x_range=[-T-0.5, T+0.5, 0.5],
             y_range=[0, 0.6, 0.5],
+            x_length=12,
+            y_length=4,
             tips=False,
             axis_config={"include_numbers": False},
-            ).scale(0.6
-            ).next_to(hyps, DOWN, buff=0.3
-            ).to_edge(LEFT, buff=0.5
+            # ).scale(0.6
+            # ).next_to(hyps, DOWN, buff=0.3
+            ).to_edge(DOWN, buff=0.5
             )
         fc_tot = VGroup(
             fc_graph,
@@ -146,14 +150,19 @@ class Centering(Slide):
 
         )
         g = lambda x: np.exp(-x**2)
-        fc_points = VGroup([Dot(fc_graph.c2p(x,
-            (g(x+4) + g(x) + g(x-4))/2
-            ), color=YELLOW)
-            for x in range(0,5)])
+        fc = lambda x: np.sum([g(x - i) for i in range(-T*4, T*5, T)]) / 2
+        fc_points = VGroup([Dot(fc_graph.c2p(x, fc(x)), color=YELLOW) for x in np.arange(-T,T+0.1, 0.5)])
 
+        def translate(points, start, ax: Axes):
+            shift = (ax.c2p(0.5, 0) - ax.c2p(0, 0)) * np.sign(start)
+            positions = np.array([ax.p2c(p.get_center())[0] for p in points])
+            index = np.argmin(np.abs(positions-start))
+            r = range(index, len(points)) if start > 0 else range(index+1)
+            for i in r:
+                points[i].shift(shift)
 
         arrow = DoubleArrow(
-            start = fc_points[0].get_center(),
+            start = fc_points[16].get_center(),
             end=fc_points[-1].get_center(),
             buff=0.2,
             color=YELLOW,
@@ -166,25 +175,24 @@ class Centering(Slide):
         arrow = VGroup(arrow, arrow_label)
 
 
-        center_graph = Axes(
-            x_range=[-6.5, 6.5, 1],
-            y_range=[0, 0.6, 0.5],
-            tips=False,
-            axis_config={"include_numbers": False},
-            ).scale(0.6
-            ).next_to(hyps, DOWN, buff=0.3
-            ).to_edge(LEFT, buff=0.5
-            )
-        center_tot = VGroup(
-            center_graph,
-            graph.get_x_axis_label("R", edge=RIGHT).scale(0.6)
-        )
-        center_points = VGroup([Dot(center_graph.c2p(x,
-            (g(x+4) + g(x) + g(x-4))/2
-            ), color=YELLOW)
-            for x in range(-2,3)])
-        new_range = list(range(-6,-2)) + list(range(3,7))
-        new_points = VGroup([Dot(center_graph.c2p(x,0), color=ORANGE)
+        # center_graph = Axes(
+        #     x_range=[-T-0.5, T+0.5, 0.5],
+        #     y_range=[0, 0.6, 0.5],
+        #     y_length=4,
+        #     x_length=10,
+        #     tips=False,
+        #     axis_config={"include_numbers": False},
+        #     # ).scale(0.6
+        #     ).next_to(hyps, DOWN, buff=0.3
+        #     # ).to_edge(LEFT, buff=0.5
+        #     )
+        # center_tot = VGroup(
+        #     center_graph,
+        #     graph.get_x_axis_label("R'", edge=RIGHT).scale(0.6)
+        # )
+        center_points = VGroup([Dot(fc_graph.c2p(x,fc(x)), color=YELLOW)for x in np.arange(-1.5,1.6,0.5)])
+        new_range = np.concatenate((np.arange(-T,-1.5,0.5), np.arange(2,T+0.1,0.5))) #list(range(-6,-2)) + list(range(3,7))
+        new_points = VGroup([Dot(fc_graph.c2p(x,0), color=ORANGE)
             for x in new_range]).set_z_index(2)
 
 
@@ -366,10 +374,10 @@ class Centering(Slide):
             ).to_edge(LEFT, buff=2
             )
 
-        # s0_img = ImageMobject("fc.png"
-        #     ).scale(0.5
-        #     ).move_to(DOWN*1.1
-        #     )
+        s0_img = ImageMobject("fc_exp.png"
+            ).scale(0.5
+            ).move_to(DOWN*1.1
+            )
 
         graph1 = VGroup(
             graph, curve, curve100, label_valid, points, labels,
@@ -398,7 +406,7 @@ class Centering(Slide):
         self.play(Write(hyps[2]))
         self.next_slide()
 
-        l = Tex("1D, pristine").scale(0.6).next_to(fc_tot, RIGHT, buff=0.2)
+        l = Tex("1D, pristine").scale(0.6).next_to(fc_graph.y_axis.get_end(), RIGHT, buff=0.2)
         self.play(Create(fc_tot))
         self.play(Create(fc_points))
         self.play(Write(l))
@@ -410,16 +418,24 @@ class Centering(Slide):
         self.play(FadeOut(arrow))
         self.next_slide()
 
-        self.play(ReplacementTransform(
-            VGroup(fc_tot, fc_points),
-            VGroup(center_tot, center_points)),
-            )
-        self.next_slide()
+        orange_points = VGroup()
+        self.play(hyps[2][1].animate.set(color=ORANGE))
+        for i in range(15):
+            translate(fc_points, 4+i/2, fc_graph)
+            translate(fc_points, -4-i/2, fc_graph)
+            d1 = Dot(fc_graph.c2p(4+i/2, 0),  color=ORANGE)
+            d2 = Dot(fc_graph.c2p(-4-i/2, 0), color=ORANGE)
+            orange_points.add(d1, d2)
+            self.add(d1, d2)
+            # self.remove(fc_points[i], fc_points[-i-1])
+            self.wait(0.5)
+            self.next_slide()
+        # self.play(ReplacementTransform(
+        #     VGroup(fc_tot, fc_points),
+        #     VGroup(center_tot, center_points)),
+        #     )
 
-        self.play(Create(new_points), hyps[2][1].animate.set(color=ORANGE))
-        self.next_slide()
-
-        self.play(FadeOut(new_points), FadeOut(center_points), FadeOut(center_tot), FadeOut(l))
+        self.play(FadeOut(fc_points), FadeOut(orange_points), FadeOut(fc_tot), FadeOut(l))
         self.play(Write(hyps[3]))
         self.next_slide()
 
@@ -448,10 +464,10 @@ class Centering(Slide):
         lattice2d.remove(label_uc, label_sc)
         self.play(FadeOut(lattice2d), FadeOut(l))
 
-        # self.play(FadeIn(s0_img))
-        # self.next_slide()
+        self.play(FadeIn(s0_img))
+        self.next_slide()
 
-        # self.play(FadeOut(s0_img))
+        self.play(FadeOut(s0_img))
 
 
         self.play(hyps[3].animate.move_to(hyps[0], aligned_edge=LEFT), FadeOut(hyps[2]))
@@ -488,8 +504,12 @@ class Centering(Slide):
         self.play(Create(distances0))
         self.play(Create(distances1))
 
-        final_hyp = Tex(r"\mbox{$\bullet$ but how do we center? $\rightarrow$ minimizing the perimeter of the triangle $(R,R',D) for all replicas of $(R,R')$")
-
+        final_hyp = Tex(r"\mbox{$\bullet$ but how do we center? $\rightarrow$ minimizing the perimeter of the triangle $(R,R',D)$ for all replicas of $(R,R')$"
+            ).scale(0.6
+            ).next_to(title, DOWN, buff=0.5
+            ).to_edge(LEFT, buff=0.5
+            )
+        self.play(ReplacementTransform(hyps[3], final_hyp))
         self.next_slide()
 
 
@@ -498,5 +518,15 @@ class Centering(Slide):
             distances0, distances1, triangle, bisettrice,
             explain_label, x_label, y_label
         )
-        self.play(FadeOut(group), FadeOut(img))
+        title_out = Tex("Degeneracy and symmetries").to_edge(DOWN)
+        self.play(Write(title_out))
+
+        self.play(
+            FadeOut(group),
+            FadeOut(img),
+            FadeOut(final_hyp),
+            Transform(title, title_out),
+            title.animate.shift(UP*2),
+            title_out.animate.to_edge(UP),
+            )
         self.next_slide()

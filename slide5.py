@@ -1,26 +1,25 @@
 from manim import *
 from imshow import physics
-
+from manim_slides import Slide
 # ricordati di mettere le fc che cadono in Centering
 
-class Degeneracy(MovingCameraScene):
+class Degeneracy(Slide, MovingCameraScene):
     def construct(self):
         title = Tex("Degeneracy and symmetries").to_edge(UP)
 
         hyps = VGroup(
             # Tex(r"Phosphorus doped Silicon in $4\times 4 \times 4$ SC"),
             # Tex("Weird zig-zag profile in degenerate branch"),
-            Tex("The defect breaks some space symmetries, lifting some degeneracies"),
-            Tex(r"Perturbation theory is \textbf{not} gauge invariant")
+            Tex(r"$\bullet$ The defect breaks some space symmetries, lifting some degeneracies"),
+            Tex(r"$\bullet$ Perturbation theory is \textbf{not} gauge invariant")
             ).scale(0.6
             ).arrange(DOWN, buff=0.2, aligned_edge=LEFT
             ).next_to(title, DOWN, buff=0.5
             ).to_edge(LEFT, buff=0.5
             )
 
-
-        s0_img = ImageMobject("bands01.png").scale(0.3).shift(DOWN)
-        s0_img_degen = ImageMobject("bands01_deg.png").scale(0.3).shift(DOWN)
+        s0_img = ImageMobject("bands01.png").scale(0.4).shift(DOWN)
+        s0_img_degen = ImageMobject("bands01_deg.png").scale(0.4).shift(DOWN)
 
         lim = 5
         s1_ax = NumberPlane(
@@ -122,34 +121,57 @@ class Degeneracy(MovingCameraScene):
         s3_img = ImageMobject("lw_bands.png").scale(0.4).shift(DOWN)
 
         self.add(title)
-        self.play(Write(hyps))
+        self.next_slide()
 
-        self.add(s0_img)
-        zoom_point = s0_img.get_center() + RIGHT * 0.9 + UP * 0.7
+        self.play(Write(hyps))
+        self.next_slide()
+
+        self.next_slide()
+        self.play(FadeIn(s0_img))
+        zoom_point = s0_img.get_center() + RIGHT * 1.0 + UP * 0.9
         self.camera.frame.save_state()
+        self.next_slide()
+
         self.play(
             self.camera.frame.animate.set(width=s0_img.width*0.3).move_to(zoom_point),
             run_time=3,
         )
+        self.next_slide()
+
 
         self.play(ReplacementTransform(s0_img, s0_img_degen), run_time=0.5)
+        self.next_slide()
+
         self.play(Restore(self.camera.frame))
+        self.play(FadeOut(s0_img_degen))
+        self.play(Create(s1_group))
+        self.next_slide()
 
+        self.play(Rotate(s1_kets, angle=2*np.pi, about_point=s1_ax.c2p(0,0)), run_time=4)
+        self.next_slide()
 
-        self.add(s1_group)
-        self.play(Rotate(s1_kets, angle=2*np.pi, about_point=s1_ax.c2p(0,0)), run_time=2)
         self.play(ReplacementTransform(s1_table, s1_table_update))
         self.play(ReplacementTransform(s1_group_label, s1_group_label_new))
-        self.play(Rotate(s1_kets, angle=2*np.pi, about_point=s1_ax.c2p(0,0)), run_time=2)
+        self.play(Rotate(s1_kets, angle=2*np.pi, about_point=s1_ax.c2p(0,0)), run_time=4)
+        self.next_slide()
+
         self.play(Write(s1_end_label))
+        self.next_slide()
+
         self.play(ReplacementTransform(s1_end_label, s1_end_label1))
+        self.next_slide()
+
         self.play(FadeOut(s1_group), FadeOut(s1_end_label1))
+        self.play(FadeIn(s2_img))
+        self.next_slide()
 
-        self.FadeIn(s2_img)
         self.play(ReplacementTransform(s2_img, s2_img_deg))
-        self.play(FadeOut(s2_img_deg))
+        self.next_slide()
 
+        self.play(FadeOut(s2_img_deg))
         self.play(FadeIn(s3_img))
-        self.play(FadeOut(s3_img), FadeOut(hyps))
+        self.next_slide()
+
+        self.play(FadeOut(s3_img), FadeOut(hyps), FadeOut(title))
 
         self.wait(3)

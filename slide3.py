@@ -125,7 +125,7 @@ class DefectMatrix(Slide):
 
         hyps = VGroup(
             Tex(r"$\bullet$ A single defect disrupts the periodicity of the lattice"),
-            Tex(r"$\bullet$ if defect SC has same periodicity as force constants $\rightarrow$ all off-diagonal blocks available"),
+            Tex(r"\mbox{$\bullet$ if defect SC has same periodicity as force constants $\rightarrow$ all off-diagonal blocks available}"),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2
         ).scale(0.6).next_to(title, DOWN).to_edge(LEFT)
         matrix_data = [[VMobject() for _ in range(n)] for _ in range(n)]
@@ -241,7 +241,7 @@ class PerturbationTheory(Slide):
 
         eq2 = VGroup(MathTex(r"E_{qs}^{(2)} = \bra{qs}  \sum_{q's'} \left[ {{V(q, -q')}} {{ G(E_{qs}^{(0)} , q's') }} {{V(q', -q)}} \right] \ket{qs}",
             tex_template=physics),
-            MathTex(r"{{G(E_{qs}^{(0)}, q's')}} := \frac{\ket{q's'}\bra{q's'}}{E_{qs}^{(0)} - E_{q's}^{(0)}}", tex_template=physics)
+            MathTex(r"{{G(E_{qs}^{(0)}, q's')}} := \frac{\ket{q's'}\bra{q's'}}{E_{qs}^{(0)} - E_{q's'}^{(0)}}", tex_template=physics)
         ).scale(0.6
         ).arrange(DOWN, aligned_edge=LEFT
         ).next_to(subtitle2, DOWN
@@ -343,7 +343,7 @@ class PerturbationTheory(Slide):
         self.next_slide()
 
         new_eq2 = VGroup(
-            MathTex(r"E_{qs}^{(2)} = \sum_{q's'} \frac{|\bra{q's'} V (q', -q) \ket{qs}|^2}{E_{qs}^{(0)} - E_{q's}^{(0)}}", tex_template=physics),
+            MathTex(r"E_{qs}^{(2)} = \sum_{q's'} \frac{|\bra{q's'} V (q', -q) \ket{qs}|^2}{E_{qs}^{(0)} - E_{q's'}^{(0)}}", tex_template=physics),
             MathTex(r"\Gamma_{qs}^{(2)} = \Im{E_{qs}^{(2)}} = \sum_{q's'} |\bra{q's'} V (q', -q) \ket{qs}|^2 \delta(E_{qs}^{(0)} - E_{q's}^{(0)})", tex_template=physics)
             ).scale(0.6
             ).arrange(DOWN, aligned_edge=LEFT

@@ -1,5 +1,5 @@
-from manim import *
 from manim_slides import Slide
+from manim import *
 
 amsmath = TexTemplate()
 amsmath.add_to_preamble(r"\usepackage{amsmath}")
@@ -88,7 +88,7 @@ class Phonon(Slide):
             ).set(color=YELLOW)
 
         self.play(Write(label_N))
-        self.next_slide(auto_next=True)
+        # self.next_slide(auto_next=True)
 
         atom0 = atoms[7].copy()
         springs0 = springs.copy()
@@ -108,8 +108,10 @@ class Phonon(Slide):
             Transform(springs, springs1))
         self.next_slide()
 
-        self.play(Transform(atoms[7], atom0),
-                Transform(springs, springs0))
+        atoms[7].become(atom0)
+        springs.become(springs0)
+        # self.play(Transform(atoms[7], atom0),
+        #         Transform(springs, springs0))
 
         # force_label = Tex("forces", color=YELLOW).scale(0.6).next_to(atoms, DOWN, aligned_edge=RIGHT, buff=0.3)
         # self.add(force_label)
@@ -213,8 +215,8 @@ class ForceConstants(Slide):
                 self.play(Create(vecs[0]), Write(label_real))
             else:
                 self.play(ReplacementTransform(vecs[i-1], vecs[i]))
-            self.next_slide(auto_next=True)
             self.play([atoms[j].animate.shift(RIGHT*0.3) for j in range(i, len(atoms), 4)], run_time=0.5)
+            # self.next_slide(auto_next=True)
             self.next_slide(loop=True)
             self.play([atoms[j].animate.shift(LEFT*0.6) for j in range(i, len(atoms), 4)], run_time=0.5)
             self.play([atoms[j].animate.shift(RIGHT*0.6) for j in range(i, len(atoms), 4)], run_time=0.5)
@@ -224,7 +226,7 @@ class ForceConstants(Slide):
         label_reciprocal = Tex(r"reciprocal space").scale(0.6)
         xs = np.linspace(-lim, lim, 200)
         f0 = lambda x: -1
-        f12 = lambda x: np.sin(x*np.pi/2)
+        f12 = lambda x: np.sin(x*np.pi)
         points0 = [axes.n2p(x) + UP * f0(x) for x in xs]
         points12 = [axes.n2p(x) + UP * f12(x) for x in xs]
         curve0 = VMobject(color=YELLOW)
@@ -248,16 +250,16 @@ class ForceConstants(Slide):
             else:
                 self.play(ReplacementTransform(vecs[i-1], vecs[i]))
                 if i == 2:
-                    self.play(ReplacementTransform(curve0, curve12))
+                    self.play(ReplacementTransform(curve0, curve12), arr.animate.shift(UP*0.5), arr_label.animate.shift(UP*0.5))
             self.next_slide()
             r = range(i%2, len(atoms), 2)
             shifts = [f(axes.p2n(atoms[j].get_center())) for j in r]
-            self.next_slide(auto_next=True)
             self.play(*[atoms[j].animate.shift(RIGHT*0.3 * shift) for j, shift in zip(r, shifts)], run_time=0.5)
+            # self.next_slide(auto_next=True)
             self.next_slide(loop=True)
             self.play(*[atoms[j].animate.shift(LEFT *0.6 * shift) for j, shift in zip(r, shifts)], run_time=0.5)
             self.play(*[atoms[j].animate.shift(RIGHT*0.6 * shift) for j, shift in zip(r, shifts)], run_time=0.5)
-            self.next_slide(auto_next=True)
+            self.next_slide()
             [atoms[j].move_to(old_atoms[j].get_center()) for j in r]
 
 
